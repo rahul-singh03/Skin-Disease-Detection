@@ -1,0 +1,28 @@
+.background-image {
+    background-image: url('/static/Image/background.jpg');
+
+    background-size: cover;
+
+
+    /* Ensure the background covers the entire viewport */
+
+    /* Adjust padding as needed */
+    color: #fff;
+    /* Set text color to ensure readability */
+}
+
+
+
+
+.custom-card {
+    background-color: #007bff;
+    /* Blue color */
+    border-radius: 10px;
+    width: 400px;
+}
+
+.container-fluid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

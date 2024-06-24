@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card text-center bg-deepblue text-white">
+                <div class="card-body">
+                    <h1 class="display-4 text-warning">Welcome to SKINGENIE</h1>
+                    <p class="lead">This is a simple web application to detect skin diseases from images.</p>
+                    <hr class="my-4">
+                    <img src="/static/Image/LOGO ROUND.png" alt="Logo" class="mb-4"> <!-- Add your logo here -->
+                    <p>Sign in or sign up to start using the service.</p>
+                    <a class="btn btn-primary btn-lg mx-2" href="{{ url_for('signin') }}" role="button">Sign In</a>
+                    <a class="btn btn-secondary btn-lg mx-2" href="{{ url_for('signup') }}" role="button">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-deepblue {
+        background-color: #002366;
+    }
+</style>
+{% endblock %}

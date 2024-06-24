@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center text-warning">Detect Skin Condition</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6 mb-4">
+            <div class="card text-white bg-deepblue">
+                <div class="card-body">
+                    <h4 class="card-title">Select an Option</h4>
+                    <button id="selectCapture" class="btn btn-info mt-2">Capture from Webcam</button>
+                    <button id="selectUpload" class="btn btn-info mt-2">Upload an Image</button>
+                    
+                    <div id="captureSection" style="display: none;">
+                        <h4 class="card-title mt-4">Capture from Webcam</h4>
+                        <button id="openCamera" class="btn btn-info mt-2">Open Camera</button>
+                        <video id="webcam" autoplay playsinline width="100%" style="display: none;"></video>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                        <button id="capture" class="btn btn-primary mt-2" style="display: none;">Capture</button>
+                        <button id="upload" class="btn btn-success mt-2" style="display: none;">Upload Captured Image</button>
+                    </div>
+                    
+                    <div id="uploadSection" style="display: none;">
+                        <h4 class="card-title mt-4">Upload an Image</h4>
+                        <input type="file" id="imageUpload" accept="image/*" class="form-control mt-2">
+                        <button id="uploadFile" class="btn btn-success mt-2">Upload Selected Image</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingSpinner" class="text-center mt-4" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p class="text-white mt-2">Processing, please wait...</p>
+    </div>
+</div>
+
+<script>
+    const selectCaptureButton = document.getElementById('selectCapture');
+    const selectUploadButton = document.getElementById('selectUpload');
+    const captureSection = document.getElementById('captureSection');
+    const uploadSection = document.getElementById('uploadSection');
+    
+    const openCameraButton = document.getElementById('openCamera');
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas');
+    const captureButton = document.getElementById('capture');
+    const uploadButton = document.getElementById('upload');
+    const imageUpload = document.getElementById('imageUpload');
+    const uploadFileButton = document.getElementById('uploadFile');
+    const resultDiv = document.getElementById('result');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+
+    selectCaptureButton.addEventListener('click', function () {
+        captureSection.style.display = 'block';
+        uploadSection.style.display = 'none';
+    });
+
+    selectUploadButton.addEventListener('click', function () {
+        captureSection.style.display = 'none';
+        uploadSection.style.display = 'block';
+    });
+
+    openCameraButton.addEventListener('click', function () {
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function (stream) {
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    captureButton.style.display = 'block';
+                    uploadButton.style.display = 'block';
+                    openCameraButton.style.display = 'none';
+                })
+                .catch(function (error) {
+                    console.log("Something went wrong with accessing the webcam!");
+                });
+        }
+    });
+
+    captureButton.addEventListener('click', function () {
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function (blob) {
+            const url = URL.createObjectURL(blob);
+            resultDiv.innerHTML = `<img src="${url}" width="100%">`;
+        }, 'image/jpeg');
+    });
+
+    uploadButton.addEventListener('click', function () {
+        canvas.toBlob(function (blob) {
+            const formData = new FormData();
+            formData.append('file', blob, 'captured_image.jpg');
+
+            showLoadingSpinner();
+            fetch('/detect', {
+                method: 'POST',
+                body: formData
+            })
+            .then(() => {
+                window.location.href = '/detected';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                hideLoadingSpinner();
+            });
+        }, 'image/jpeg');
+    });
+
+    uploadFileButton.addEventListener('click', function () {
+        const file = imageUpload.files[0];
+        if (!file) {
+            alert('Please select a file first');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('file', file, file.name);
+
+        showLoadingSpinner();
+        fetch('/detect', {
+            method: 'POST',
+            body: formData
+        })
+        .then(() => {
+            window.location.href = '/detected';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideLoadingSpinner();
+        });
+    });
+
+    function showLoadingSpinner() {
+        loadingSpinner.style.display = 'block';
+    }
+
+    function hideLoadingSpinner() {
+        loadingSpinner.style.display = 'none';
+    }
+</script>
+
+<style>
+    .bg-deepblue {
+        background-color: #002366;
+    }
+</style>
+{% endblock %}
